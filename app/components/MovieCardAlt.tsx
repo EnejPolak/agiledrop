@@ -1,4 +1,3 @@
-// app/components/MovieCardAlt.tsx
 export type MovieCardAltProps = {
   title: string;
   poster: string | null;
@@ -9,8 +8,7 @@ export type MovieCardAltProps = {
 export default function MovieCardAlt({ title, poster, rating, releaseDate }: MovieCardAltProps) {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Unknown date";
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+    return new Date(dateString).toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'short', 
       day: 'numeric' 
@@ -28,8 +26,8 @@ export default function MovieCardAlt({ title, poster, rating, releaseDate }: Mov
     return '#ef4444'; 
   };
 
-  const ratingPercentage = getRatingPercentage(rating);
-  const ratingColor = getRatingColor(ratingPercentage);
+  const percentage = getRatingPercentage(rating);
+  const color = getRatingColor(percentage);
 
   return (
     <article className="movie-card-alt">
@@ -41,7 +39,7 @@ export default function MovieCardAlt({ title, poster, rating, releaseDate }: Mov
         )}
         
         {rating && (
-          <div className="movie-card-alt__rating" style={{ '--rating-color': ratingColor } as any}>
+          <div className="movie-card-alt__rating" style={{ '--rating-color': color } as any}>
             <svg className="rating-circle" viewBox="0 0 42 42">
               <circle
                 className="rating-circle-bg"
@@ -56,12 +54,12 @@ export default function MovieCardAlt({ title, poster, rating, releaseDate }: Mov
                 cy="21"
                 r="15.915"
                 fill="transparent"
-                strokeDasharray={`${ratingPercentage} 100`}
-                style={{ stroke: ratingColor }}
+                strokeDasharray={`${percentage} 100`}
+                style={{ stroke: color }}
               />
             </svg>
             <div className="rating-text">
-              <span className="rating-number">{ratingPercentage}</span>
+              <span className="rating-number">{percentage}</span>
               <span className="rating-percent">%</span>
             </div>
           </div>

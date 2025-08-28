@@ -6,19 +6,17 @@ const HEADERS = {
   accept: "application/json",
 };
 
-const buildTMDBUrl = (page: number, genre?: string, search?: string) => {
-  const safePage = Math.min(Math.max(page, 1), 100);
-  
+const buildUrl = (page: number, genre?: string, search?: string) => {
   if (search) {
-    return `${TMDB_BASE}/search/movie?language=en-US&page=${safePage}&query=${encodeURIComponent(search)}`;
+    return `${TMDB_BASE}/search/movie?language=en-US&page=${page}&query=${encodeURIComponent(search)}`;
   }
   
   if (genre) {
     const genres = genre.replace(/,/g, '|');
-    return `${TMDB_BASE}/discover/movie?language=en-US&page=${safePage}&with_genres=${genres}&sort_by=popularity.desc`;
+    return `${TMDB_BASE}/discover/movie?language=en-US&page=${page}&with_genres=${genres}&sort_by=popularity.desc`;
   }
   
-  return `${TMDB_BASE}/movie/popular?language=en-US&page=${safePage}`;
+  return `${TMDB_BASE}/movie/popular?language=en-US&page=${page}`;
 };
 
 const transformMovie = (m: any) => ({
@@ -36,7 +34,7 @@ export async function GET(request: Request) {
     const genre = searchParams.get('genre');
     const search = searchParams.get('search');
     
-    const apiUrl = buildTMDBUrl(page, genre || undefined, search || undefined);
+    const apiUrl = buildUrl(page, genre || undefined, search || undefined);
     const res = await fetch(apiUrl, { headers: HEADERS, cache: "no-store" });
     
     if (!res.ok) {
@@ -44,17 +42,12 @@ export async function GET(request: Request) {
     }
 
     const data = await res.json();
-    const safePage = Math.min(Math.max(page, 1), 100);
-    const totalPages = Math.min(data.total_pages || 1, 100);
-    
-    const movies = (data.results || [])
-      .filter((m: any) => m.id)
-      .map(transformMovie);
+    const movies = data.results?.map(transformMovie) || [];
 
     return NextResponse.json({
       movies,
-      currentPage: safePage,
-      hasMore: safePage < totalPages
+      currentPage: page,
+      hasMore: page < (data.total_pages || 1)
     });
   } catch (error) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
